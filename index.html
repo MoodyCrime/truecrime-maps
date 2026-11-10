@@ -294,7 +294,7 @@ body.searching .chips,body.searching .count,body.searching .filters{display:none
   </section>
 
   <section class="info" id="info" aria-label="Legenda e note">
-    <p class="ver" id="appver">TrueCrime Maps · versione 0.12 · archivio del 10/11/2026</p>
+    <p class="ver" id="appver">TrueCrime Maps · versione 0.13 · archivio del 11/11/2026</p>
     <h1>Come leggere la mappa</h1>
     <div class="card" id="infocard"></div>
   </section>
@@ -460,7 +460,7 @@ const CAT = {
 };
 const CHIPS=[["all","Tutti"],["politici","Politici"],["mafia","Mafia"],["stragi","Stragi"],["femminicidi","Femminicidi"],["irrisolti","Irrisolti"],["serial","Serial killer"],["sospette","Morti sospette"],["scomparse","Scomparse"],["altro","Altri delitti"]];
 const _cc={}; const css = k => _cc[k] ?? (_cc[k]=getComputedStyle(document.documentElement).getPropertyValue('--c-'+k).trim());
-function level(p){ if(p==="Civico"||p==="Incrocio") return "esatto"; if(/^(Strada|Piazza|Edificio)/.test(p)) return "via"; return "area"; }
+function level(p,ind){ if(p==="Civico"||p==="Incrocio") return "esatto"; if(/^(Strada|Piazza|Edificio|Luogo esatto)/.test(p)) return "via"; if(/^Luogo( \(|$)/.test(p) && !/galleria|contrada|pineta/i.test(ind||"")) return "via"; return "area"; }
 const LV = {esatto:"Civico o incrocio", via:"Via, piazza o edificio", area:"Zona approssimata"};
 const RADIUS = {esatto:0, via:150, area:900};
 function statoClass(s){ s=String(s||'').toLowerCase(); if(/irrisolto|nessun|archiviat|non accertat|non individuat/.test(s)) return "b-bad"; if(/non definitiv|in corso|appello bis|vedi fonti|verificat|indagini|da verificare/.test(s)) return "b-warn"; return "b-ok"; }
@@ -468,7 +468,7 @@ const dec = u => { try { return decodeURIComponent(u); } catch(e) { return u; } 
 const esc = s => String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const pad3 = n => String(n).padStart(3,'0');
 const norm = s => String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
-function prep(p){ p.lvl=level(p.precisione); p.ck=(CAT[p.categoria]||{k:"altro"}).k; p.hay=norm(p.caso+" "+p.vittime+" "+p.autori+" "+(p.sospettati||"")+" "+(p.alias||"")+" "+p.comune+" "+p.indirizzo+" "+p.regione+" "+p.anno+" "+p.categoria); p.words=[...new Set(p.hay.split(/[^a-z0-9]+/).filter(w=>w.length>1))]; return p; }
+function prep(p){ p.lvl=level(p.precisione,p.indirizzo); p.ck=(CAT[p.categoria]||{k:"altro"}).k; p.hay=norm(p.caso+" "+p.vittime+" "+p.autori+" "+(p.sospettati||"")+" "+(p.alias||"")+" "+p.comune+" "+p.indirizzo+" "+p.regione+" "+p.anno+" "+p.categoria); p.words=[...new Set(p.hay.split(/[^a-z0-9]+/).filter(w=>w.length>1))]; return p; }
 // Ricerca: ogni parola deve trovare riscontro (anche con un errore di battitura: erica/erika); parole vuote ignorate
 const STOP=new Set("e ed il lo la i gli le di del della dei delle da dal a al alla in nel nella con su per caso casi delitto delitti omicidio omicidi strage morte uccisione uccisa ucciso mostro".split(" "));
 function lev1(a,b){ if(Math.abs(a.length-b.length)>1) return false; let i=0,j=0,d=0; while(i<a.length&&j<b.length){ if(a[i]===b[j]){i++;j++;continue;} if(++d>1) return false; if(a.length>b.length) i++; else if(b.length>a.length) j++; else {i++;j++;} } return d+(a.length-i)+(b.length-j)<=1; }
